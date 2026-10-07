@@ -1,0 +1,76 @@
+// Budget Tracker schema (SQLite), multi-user via userId scoping.
+generator client {
+  provider      = "prisma-client-js"
+  binaryTargets = ["native", "debian-openssl-3.0.x"]
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id        Int      @id @default(autoincrement())
+  email     String   @unique
+  name      String?
+  password  String
+  createdAt DateTime @default(now())
+}
+
+model Setting {
+  id         Int      @id @default(autoincrement())
+  userId     Int?     @unique
+  needsPct   Float    @default(50)
+  wantsPct   Float    @default(30)
+  savingsPct Float    @default(20)
+  currency   String   @default("INR")
+  groqApiKey String?
+  groqModel  String?
+  updatedAt  DateTime @updatedAt
+}
+
+model Category {
+  id             Int             @id @default(autoincrement())
+  userId         Int?
+  name           String
+  defaultBucket  String          @default("Needs")
+  kind           String          @default("expense")
+  recurringItems RecurringItem[]
+  transactions   Transaction[]
+  createdAt      DateTime        @default(now())
+
+  @@unique([userId, name])
+  @@index([userId])
+}
+
+model RecurringItem {
+  id              Int       @id @default(autoincrement())
+  userId          Int?
+  name            String
+  categoryId      Int?
+  category        Category? @relation(fields: [categoryId], references: [id])
+  bucket          String
+  monthlyExpected Float
+  nature          String
+  notes           String?
+  active          Boolean   @default(true)
+  createdAt       DateTime  @default(now())
+
+  @@index([userId])
+}
+
+model Transaction {
+  id          Int       @id @default(autoincrement())
+  userId      Int?
+  date        DateTime
+  type        String
+  categoryId  Int?
+  category    Category? @relation(fields: [categoryId], references: [id])
+  bucket      String?
+  description String?
+  amount      Float
+  notes       String?
+  createdAt   DateTime  @default(now())
+
+  @@index([userId])
+}
