@@ -31,13 +31,13 @@ export default async function SettingsPage() {
   const memberSince = user?.createdAt ? new Date(user.createdAt).toLocaleDateString("en-IN", { month: "long", year: "numeric" }) : "—";
 
   return (
-    <div className="p-5 md:p-8 max-w-[1100px] mx-auto">
+    <div className="p-4 md:p-6 max-w-[1100px] mx-auto">
       <PageHeader title="Settings" subtitle="Manage your account, budget rule, and integrations" />
 
-      <div className="space-y-10">
+      <div className="space-y-8">
         <section>
           <SectionHeading title="Account" desc="Your profile and password." />
-          <div className="grid lg:grid-cols-2 gap-6 items-start">
+          <div className="grid lg:grid-cols-2 gap-4 items-start">
             <ProfileForm name={user?.name ?? ""} email={user?.email ?? sessionUser.email} memberSince={memberSince} />
             <ChangePasswordForm />
           </div>
@@ -45,18 +45,8 @@ export default async function SettingsPage() {
 
         <section>
           <SectionHeading title="Budget Rule" desc="Your 50 / 30 / 20 allocation targets." />
-          <div className="grid lg:grid-cols-2 gap-6 items-start">
+          <div className="max-w-xl">
             <SettingsForm {...initial} />
-            <div className="card p-6">
-              <h3 className="font-bold mb-3">How the dashboard is calculated</h3>
-              <ul className="muted text-sm space-y-2 leading-relaxed">
-                <li><b style={{ color: "var(--text)" }}>Income</b> — sum of your income entries for the month.</li>
-                <li><b style={{ color: "var(--text)" }}>Target</b> — income × each rule % (Needs / Wants / Savings).</li>
-                <li><b style={{ color: "var(--text)" }}>Expected</b> — sum of active recurring items per bucket.</li>
-                <li><b style={{ color: "var(--text)" }}>Actual</b> — sum of expense entries per bucket this month.</li>
-                <li><b style={{ color: "var(--text)" }}>Unspent Cash</b> — income − actual outflow.</li>
-              </ul>
-            </div>
           </div>
         </section>
 

@@ -64,3 +64,53 @@ export async function deleteTransaction(formData: FormData): Promise<void> {
   if (id) await prisma.transaction.deleteMany({ where: { id, userId: user.id } });
   revalidate();
 }
+
+export type BulkTxInput = {
+  type: TxType;
+  date: string;
+  amount: number;
+  categoryId: number | null;
+  bucket: Bucket | null;
+  description: string | null;
+  notes: string | null;
+};
+
+export type BulkResult = { ok?: boolean; error?: string; count?: number };
+
+export async function bulkCreateTransactions(entries: BulkTxInput[]): Promise<BulkResult> {
+  const user = await requireUser();
+  try {
+    if (!Array.isArray(entries) || entries.length === 0) {
+      return { error: "No entries to save." };
+    }
+
+    const validRows = entries.filter((e) => Number.isFinite(e.amount) && e.amount > 0 && Boolean(e.date));
+    if (validRows.length === 0) {
+      return { error: "Please enter at least one valid entry with an amount greater than 0." };
+    }
+
+    for (const r of validRows) {
+      if (!TX_TYPES.includes(r.type)) throw new Error(`Invalid type: ${r.type}`);
+      if (r.type === "expense" && !r.bucket) throw new Error("All expense entries must have a budget bucket (Needs / Wants / Savings).");
+    }
+
+    await prisma.transaction.createMany({
+      data: validRows.map((r) => ({
+        userId: user.id,
+        date: new Date(r.date + "T12:00:00"),
+        type: r.type,
+        amount: Number(r.amount),
+        categoryId: r.type === "expense" || r.type === "income" ? (r.categoryId ? Number(r.categoryId) : null) : null,
+        bucket: r.type === "expense" ? r.bucket : null,
+        description: r.description ? r.description.trim() || null : null,
+        notes: r.notes ? r.notes.trim() || null : null,
+      })),
+    });
+
+    revalidate();
+    return { ok: true, count: validRows.length };
+  } catch (e) {
+    return { error: e instanceof Error ? e.message : "Could not save bulk entries." };
+  }
+}
+

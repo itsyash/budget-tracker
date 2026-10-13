@@ -8,10 +8,10 @@ export default function ProfileForm({ name, email, memberSince }: { name: string
   const [state, action, pending] = useActionState<FormState, FormData>(updateProfile, {});
 
   return (
-    <form action={action} className="card p-6 space-y-4">
+    <form action={action} className="card p-4 space-y-3.5">
       <div>
-        <h3 className="font-bold mb-1">Profile</h3>
-        <p className="muted text-sm">Your account details.</p>
+        <h3 className="font-bold text-sm tracking-tight text-[var(--text)] mb-0.5">Profile</h3>
+        <p className="muted text-xs">Your account details.</p>
       </div>
       <div>
         <label className="label">Name</label>
@@ -20,15 +20,15 @@ export default function ProfileForm({ name, email, memberSince }: { name: string
       <div>
         <label className="label">Email</label>
         <input className="input" value={email} disabled style={{ opacity: 0.65 }} />
-        <p className="muted text-xs mt-1">Email can&apos;t be changed.</p>
+        <p className="muted text-[11px] mt-1">Email can&apos;t be changed.</p>
       </div>
-      <div className="muted text-xs">Member since {memberSince}</div>
+      <div className="muted text-[11px]">Member since {memberSince}</div>
 
-      {state?.error && <p className="text-sm" style={{ color: "var(--danger)" }}>{state.error}</p>}
-      {state?.ok && <p className="text-sm" style={{ color: "var(--accent-2)" }}>Profile saved.</p>}
+      {state?.error && <p className="text-xs" style={{ color: "var(--danger)" }}>{state.error}</p>}
+      {state?.ok && <p className="text-xs" style={{ color: "var(--accent)" }}>Profile saved.</p>}
 
       <button type="submit" className="btn btn-primary" disabled={pending}>
-        <Save size={16} /> {pending ? "Saving…" : "Save profile"}
+        <Save size={15} /> {pending ? "Saving…" : "Save profile"}
       </button>
     </form>
   );

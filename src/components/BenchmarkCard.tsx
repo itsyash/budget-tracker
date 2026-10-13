@@ -1,5 +1,5 @@
 import { formatINR, formatPct, pctOf } from "@/lib/format";
-import { BUCKET_COLORS, type Bucket } from "@/lib/constants";
+import { type Bucket } from "@/lib/constants";
 
 function statusFor(bucket: Bucket, over: boolean) {
   if (bucket === "Savings") return over ? { text: "On Track", danger: false } : { text: "SIPs Active", danger: false };
@@ -36,7 +36,6 @@ export default function BenchmarkCard({
   income: number;
   breakdown?: { name: string; amount: number }[];
 }) {
-  const color = BUCKET_COLORS[bucket];
   const actualPct = pctOf(actual, income);
   const expectedPct = pctOf(expected, income);
   const over = bucket === "Savings" ? actual >= target : actual > target;
@@ -44,57 +43,62 @@ export default function BenchmarkCard({
   const fill = target > 0 ? Math.min((actual / target) * 100, 100) : 0;
 
   return (
-    <div className="card p-5">
-      <div className="flex items-center justify-between mb-4">
-        <div className="flex items-center gap-2">
-          <span className="inline-block h-3 w-3 rounded-sm" style={{ background: color }} />
-          <h3 className="font-bold">{bucket} <span className="muted font-medium">({pct}% Rule)</span></h3>
-        </div>
-        <span className="badge" style={status.danger ? { color: "var(--danger)", borderColor: "color-mix(in srgb, var(--danger) 45%, transparent)" } : { color, borderColor: "color-mix(in srgb, " + color + " 45%, transparent)" }}>
-          {status.text}
-        </span>
-      </div>
-
-      <div className="grid grid-cols-3 gap-2 text-center mb-4">
-        {[
-          { k: "Target (Rule)", amt: target, p: pct },
-          { k: "Expected", amt: expected, p: expectedPct },
-          { k: "Actual Outflow", amt: actual, p: actualPct, accent: true },
-        ].map((c) => (
-          <div key={c.k}>
-            <div className="muted text-[11px] font-semibold uppercase tracking-wide mb-1">{c.k}</div>
-            <div className="font-bold text-sm" style={c.accent ? { color } : undefined}>{formatINR(c.amt)}</div>
-            <div className="muted text-[11px]">{formatPct(c.p)}</div>
+    <div className="card p-4 flex flex-col justify-between">
+      <div>
+        <div className="flex items-center justify-between mb-3.5">
+          <div className="flex items-center gap-2">
+            <h3 className="font-bold text-sm tracking-tight text-[var(--text)]">{bucket} <span className="muted font-normal text-xs">({pct}% Rule)</span></h3>
           </div>
-        ))}
-      </div>
+          <span className={`badge text-[11px] ${status.danger ? "text-[var(--danger)]" : "text-[var(--accent)] font-semibold"}`}>
+            {status.text}
+          </span>
+        </div>
 
-      <div className="flex items-center justify-between text-[11px] muted mb-1.5">
-        <span>Actual: {formatPct(actualPct)} of income</span>
-        <span>Cap: {pct}%</span>
-      </div>
-      <div className="progress">
-        <span style={{ width: `${fill}%`, background: status.danger ? "var(--danger)" : color }} />
-      </div>
+        <div className="grid grid-cols-3 gap-2 text-center mb-3.5 py-2 rounded-md bg-[var(--panel-2)] border border-[var(--border)]">
+          {[
+            { k: "Target", amt: target, p: pct },
+            { k: "Expected", amt: expected, p: expectedPct },
+            { k: "Actual", amt: actual, p: actualPct, accent: true },
+          ].map((c) => (
+            <div key={c.k} className="px-1">
+              <div className="muted text-[10px] font-semibold uppercase tracking-wider mb-0.5">{c.k}</div>
+              <div className={`font-bold text-xs truncate ${c.accent ? (status.danger ? "text-[var(--danger)]" : "text-[var(--accent)]") : "text-[var(--text)]"}`}>
+                {formatINR(c.amt)}
+              </div>
+              <div className="muted text-[10px]">{formatPct(c.p)}</div>
+            </div>
+          ))}
+        </div>
 
-      <p className="muted text-xs mt-3 leading-relaxed">{messageFor(bucket, pct, target, actual, actualPct)}</p>
+        <div className="flex items-center justify-between text-[11px] muted mb-1">
+          <span>Actual: {formatPct(actualPct)} of income</span>
+          <span>Target: {pct}%</span>
+        </div>
+        <div className="progress">
+          <span style={{ width: `${fill}%`, background: status.danger ? "var(--danger)" : "var(--accent)" }} />
+        </div>
+
+        <p className="muted text-[11px] mt-2.5 leading-relaxed">{messageFor(bucket, pct, target, actual, actualPct)}</p>
+      </div>
 
       {breakdown && (
-        <div className="mt-4 pt-3" style={{ borderTop: "1px solid var(--border)" }}>
-          <div className="muted text-[11px] font-semibold uppercase tracking-wide mb-2">By category</div>
+        <div className="mt-3.5 pt-3 border-t border-[var(--border)]">
+          <div className="muted text-[10px] font-semibold uppercase tracking-wider mb-2">By category</div>
           {breakdown.length === 0 ? (
-            <div className="muted text-xs">No spending in this bucket yet.</div>
+            <div className="muted text-[11px]">No spending in this bucket yet.</div>
           ) : (
-            <div className="space-y-2">
+            <div className="space-y-1.5">
               {breakdown.map((it) => {
                 const p = pctOf(it.amount, actual);
                 return (
                   <div key={it.name}>
-                    <div className="flex items-center justify-between text-xs mb-1">
-                      <span className="truncate">{it.name}</span>
+                    <div className="flex items-center justify-between text-[11px] mb-0.5">
+                      <span className="truncate text-[var(--text)]">{it.name}</span>
                       <span className="muted whitespace-nowrap ml-2">{formatINR(it.amount)} <span className="opacity-70">({formatPct(p)})</span></span>
                     </div>
-                    <div className="progress" style={{ height: 6 }}><span style={{ width: `${Math.min(p, 100)}%`, background: color }} /></div>
+                    <div className="progress" style={{ height: 4 }}>
+                      <span style={{ width: `${Math.min(p, 100)}%`, background: status.danger ? "var(--danger)" : "var(--accent)" }} />
+                    </div>
                   </div>
                 );
               })}

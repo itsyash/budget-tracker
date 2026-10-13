@@ -11,10 +11,10 @@ export default function ChangePasswordForm() {
   useEffect(() => { if (state?.ok) formRef.current?.reset(); }, [state]);
 
   return (
-    <form ref={formRef} action={action} className="card p-6 space-y-4 max-w-xl">
+    <form ref={formRef} action={action} className="card p-4 space-y-3.5 max-w-xl">
       <div>
-        <h3 className="font-bold mb-1">Change Password</h3>
-        <p className="muted text-sm">Update your login password.</p>
+        <h3 className="font-bold text-sm tracking-tight text-[var(--text)] mb-0.5">Change Password</h3>
+        <p className="muted text-xs">Update your account login password.</p>
       </div>
 
       <div>
@@ -32,11 +32,11 @@ export default function ChangePasswordForm() {
         </div>
       </div>
 
-      {state?.error && <p className="text-sm" style={{ color: "var(--danger)" }}>{state.error}</p>}
-      {state?.ok && <p className="text-sm" style={{ color: "var(--accent-2)" }}>Password updated.</p>}
+      {state?.error && <p className="text-xs" style={{ color: "var(--danger)" }}>{state.error}</p>}
+      {state?.ok && <p className="text-xs" style={{ color: "var(--accent)" }}>Password updated.</p>}
 
       <button type="submit" className="btn btn-primary" disabled={pending}>
-        <KeyRound size={16} /> {pending ? "Updating…" : "Update password"}
+        <KeyRound size={15} /> {pending ? "Updating…" : "Update password"}
       </button>
     </form>
   );

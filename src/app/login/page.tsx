@@ -1,12 +1,11 @@
-"use client";
+import { Wallet } from "lucide-react";
+import { registrationMode } from "@/lib/registration";
+import LoginForm from "@/components/forms/LoginForm";
 
-import Link from "next/link";
-import { useActionState } from "react";
-import { loginAction, type LoginState } from "@/actions/auth";
-import { Wallet, LogIn } from "lucide-react";
+export const dynamic = "force-dynamic";
 
 export default function LoginPage() {
-  const [state, action, pending] = useActionState<LoginState, FormData>(loginAction, {});
+  const allowRegister = registrationMode() === "open";
 
   return (
     <div className="min-h-screen flex items-center justify-center p-4">
@@ -21,27 +20,7 @@ export default function LoginPage() {
           </div>
         </div>
 
-        <form action={action} className="card p-6 space-y-4">
-          <div>
-            <label className="label" htmlFor="email">Email</label>
-            <input id="email" name="email" type="email" autoComplete="username" className="input" placeholder="you@example.com" required />
-          </div>
-          <div>
-            <label className="label" htmlFor="password">Password</label>
-            <input id="password" name="password" type="password" autoComplete="current-password" className="input" placeholder="••••••••" required />
-          </div>
-
-          {state?.error && <p className="text-sm" style={{ color: "var(--danger)" }}>{state.error}</p>}
-
-          <button type="submit" className="btn btn-primary w-full" disabled={pending}>
-            <LogIn size={16} />
-            {pending ? "Signing in…" : "Sign in"}
-          </button>
-        </form>
-
-        <p className="muted text-sm text-center mt-4">
-          No account yet? <Link href="/register" className="accent">Create one</Link>
-        </p>
+        <LoginForm allowRegister={allowRegister} />
       </div>
     </div>
   );

@@ -44,11 +44,71 @@ const HELP = [
   "/undo — remove my last additions",
 ].join("\n");
 
+const MAX_INPUT_LENGTH = 1000;
+const MAX_TG_MESSAGE_LENGTH = 4000;
+
+const userActivity = new Map<string, number[]>();
+
+function checkRateLimit(userId: string): { allowed: boolean; message?: string } {
+  const now = Date.now();
+  const timestamps = (userActivity.get(userId) || []).filter((t) => now - t < 60000);
+
+  if (timestamps.length > 0 && now - timestamps[timestamps.length - 1] < 1000) {
+    return { allowed: false, message: "⏳ Please wait a moment before sending another message." };
+  }
+
+  if (timestamps.length >= 20) {
+    return { allowed: false, message: "⚠️ Rate limit reached (max 20 messages per minute). Please slow down." };
+  }
+
+  timestamps.push(now);
+  userActivity.set(userId, timestamps);
+
+  if (userActivity.size > 500) {
+    for (const [k, v] of userActivity) {
+      if (v.every((t) => now - t >= 60000)) userActivity.delete(k);
+    }
+  }
+
+  return { allowed: true };
+}
+
 async function tg(method: string, body: unknown) {
   const r = await fetch(`${API}/${method}`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(body) });
   return r.json();
 }
-const send = (chatId: number, text: string) => tg("sendMessage", { chat_id: chatId, text, parse_mode: "HTML" });
+
+async function send(chatId: number, text: string) {
+  if (text.length <= MAX_TG_MESSAGE_LENGTH) {
+    return tg("sendMessage", { chat_id: chatId, text, parse_mode: "HTML" });
+  }
+
+  const lines = text.split("\n");
+  const chunks: string[] = [];
+  let current = "";
+
+  for (const line of lines) {
+    if ((current ? current + "\n" + line : line).length > MAX_TG_MESSAGE_LENGTH) {
+      if (current) chunks.push(current);
+      if (line.length > MAX_TG_MESSAGE_LENGTH) {
+        for (let i = 0; i < line.length; i += MAX_TG_MESSAGE_LENGTH) {
+          chunks.push(line.slice(i, i + MAX_TG_MESSAGE_LENGTH));
+        }
+        current = "";
+      } else {
+        current = line;
+      }
+    } else {
+      current = current ? current + "\n" + line : line;
+    }
+  }
+  if (current) chunks.push(current);
+
+  for (const chunk of chunks) {
+    await tg("sendMessage", { chat_id: chatId, text: chunk, parse_mode: "HTML" });
+    await sleep(150);
+  }
+}
 
 async function getBotUserId(): Promise<number> {
   if (cachedUserId) return cachedUserId;
@@ -133,6 +193,17 @@ async function handleMessage(msg: any) {
 
   const text = String(msg.text || "").trim();
   if (!text) return;
+
+  const rate = checkRateLimit(fromId || String(chatId));
+  if (!rate.allowed) {
+    await send(chatId, rate.message!);
+    return;
+  }
+
+  if (text.length > MAX_INPUT_LENGTH) {
+    await send(chatId, `⚠️ Message is too long (${text.length} characters, max ${MAX_INPUT_LENGTH}). Please send shorter expense notes.`);
+    return;
+  }
   if (text === "/start" || text === "/help") { await send(chatId, HELP); return; }
 
   let userId: number;

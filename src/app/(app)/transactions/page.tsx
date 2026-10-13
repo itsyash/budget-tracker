@@ -8,6 +8,7 @@ import BucketBadge from "@/components/BucketBadge";
 import DeleteButton from "@/components/DeleteButton";
 import FilterBar from "@/components/FilterBar";
 import TransactionForm from "@/components/forms/TransactionForm";
+import BulkTransactionForm from "@/components/forms/BulkTransactionForm";
 import { deleteTransaction } from "@/actions/transactions";
 
 export const dynamic = "force-dynamic";
@@ -47,19 +48,28 @@ export default async function TransactionsPage({ searchParams }: { searchParams:
   const repaidTotal = txs.filter((t) => t.type === "repayment").reduce((s, t) => s + t.amount, 0);
 
   return (
-    <div className="p-5 md:p-8 max-w-[1400px] mx-auto">
-      <PageHeader title="Daily Log" subtitle="Every income, expense, and lending entry" actions={<TransactionForm categories={catsForm} />} />
+    <div className="p-4 md:p-6 max-w-[1400px] mx-auto">
+      <PageHeader
+        title="Daily Log"
+        subtitle="Every income, expense, and lending entry"
+        actions={
+          <div className="flex items-center gap-2">
+            <BulkTransactionForm categories={catsForm} />
+            <TransactionForm categories={catsForm} />
+          </div>
+        }
+      />
       <FilterBar categories={catsFilter} current={{ type, from, to, categoryId, bucket }} />
 
-      <div className="card p-4 mb-6 flex flex-wrap items-center justify-between gap-3">
-        <span className="muted text-sm">{txs.length} {txs.length === 1 ? "entry" : "entries"}{hasFilter ? " · filtered" : ""}</span>
-        <div className="flex flex-wrap gap-x-6 gap-y-1 text-sm">
-          <span className="muted">Income <b className="ml-1" style={{ color: "var(--accent-2)" }}>{formatINR(incomeTotal)}</b></span>
-          <span className="muted">Expenses <b className="ml-1" style={{ color: "var(--text)" }}>{formatINR(expenseTotal)}</b></span>
-          <span className="muted">Net <b className="ml-1" style={{ color: "var(--orange)" }}>{formatINR(incomeTotal - expenseTotal)}</b></span>
+      <div className="card px-4 py-3 mb-4 flex flex-wrap items-center justify-between gap-3 text-xs">
+        <span className="muted font-medium">{txs.length} {txs.length === 1 ? "entry" : "entries"}{hasFilter ? " · filtered" : ""}</span>
+        <div className="flex flex-wrap gap-x-5 gap-y-1">
+          <span className="muted">Income <b className="ml-1 text-[var(--accent)] font-semibold">{formatINR(incomeTotal)}</b></span>
+          <span className="muted">Expenses <b className="ml-1 text-[var(--text)] font-semibold">{formatINR(expenseTotal)}</b></span>
+          <span className="muted">Net <b className="ml-1 font-semibold text-[var(--text)]">{formatINR(incomeTotal - expenseTotal)}</b></span>
           {(lentTotal > 0 || repaidTotal > 0) && (<>
-            <span className="muted">Lent <b className="ml-1" style={{ color: TX_TYPE_COLOR.lending }}>{formatINR(lentTotal)}</b></span>
-            <span className="muted">Repaid <b className="ml-1" style={{ color: TX_TYPE_COLOR.repayment }}>{formatINR(repaidTotal)}</b></span>
+            <span className="muted">Lent <b className="ml-1 text-[var(--muted)]">{formatINR(lentTotal)}</b></span>
+            <span className="muted">Repaid <b className="ml-1 text-[var(--accent)] font-semibold">{formatINR(repaidTotal)}</b></span>
           </>)}
         </div>
       </div>
@@ -70,16 +80,22 @@ export default async function TransactionsPage({ searchParams }: { searchParams:
           <tbody>
             {txs.length === 0 && <tr><td colSpan={8} className="text-center muted py-10">{hasFilter ? "No entries match these filters." : "No entries yet. Click “Add Entry” to log your first income or expense."}</td></tr>}
             {txs.map((t) => {
-              const color = TX_TYPE_COLOR[t.type as TxType] ?? "#94a3b8";
+              const isPositive = t.type === "income" || t.type === "repayment";
               const initial = { id: t.id, type: t.type, date: new Date(t.date).toISOString().slice(0, 10), amount: t.amount, categoryId: t.categoryId, bucket: t.bucket, description: t.description, notes: t.notes };
               return (
                 <tr key={t.id}>
-                  <td className="whitespace-nowrap">{fmtDate(t.date)}</td>
-                  <td><span className="badge" style={{ color, borderColor: `color-mix(in srgb, ${color} 45%, transparent)` }}>{TX_TYPE_LABEL[t.type as TxType] ?? t.type}</span></td>
-                  <td className="whitespace-nowrap">{t.category?.name ?? <span className="muted">—</span>}</td>
+                  <td className="whitespace-nowrap text-xs">{fmtDate(t.date)}</td>
+                  <td>
+                    <span className={`badge text-[11px] ${isPositive ? "text-[var(--accent)] font-semibold" : "text-[var(--muted)]"}`}>
+                      {TX_TYPE_LABEL[t.type as TxType] ?? t.type}
+                    </span>
+                  </td>
+                  <td className="whitespace-nowrap text-xs">{t.category?.name ?? <span className="muted">—</span>}</td>
                   <td><BucketBadge bucket={t.bucket} /></td>
-                  <td>{t.description ?? <span className="muted">—</span>}</td>
-                  <td className="text-right font-semibold whitespace-nowrap" style={t.type !== "expense" ? { color } : undefined}>{SIGN[t.type] ?? ""}{formatINR(t.amount)}</td>
+                  <td className="text-xs">{t.description ?? <span className="muted">—</span>}</td>
+                  <td className={`text-right font-semibold whitespace-nowrap text-xs ${isPositive ? "text-[var(--accent)]" : "text-[var(--text)]"}`}>
+                    {SIGN[t.type] ?? ""}{formatINR(t.amount)}
+                  </td>
                   <td className="muted text-xs max-w-[180px] truncate">{t.notes}</td>
                   <td><div className="flex items-center gap-1 justify-end"><TransactionForm categories={catsForm} initial={initial} /><DeleteButton action={deleteTransaction} id={t.id} message="Delete this entry? This cannot be undone." /></div></td>
                 </tr>

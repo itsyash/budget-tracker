@@ -22,9 +22,9 @@ export default function BenchmarkBarChart({ data }: { data: BenchmarkRow[] }) {
         <YAxis tickFormatter={(v) => formatINRCompact(Number(v))} tick={{ fontSize: 11, fill: "#94a3b8" }} axisLine={false} tickLine={false} width={56} />
         <Tooltip formatter={(v) => formatINR(Number(v))} contentStyle={tooltipStyle} cursor={{ fill: "rgba(148,163,184,.08)" }} />
         <Legend wrapperStyle={{ fontSize: 12 }} />
-        <Bar dataKey="Target" name="Target (Rule)" fill="#94a3b8" radius={[4, 4, 0, 0]} />
-        <Bar dataKey="Expected" fill="#8b5cf6" radius={[4, 4, 0, 0]} />
-        <Bar dataKey="Actual" name="Actual Spent" fill="#0e9f6e" radius={[4, 4, 0, 0]} />
+        <Bar dataKey="Target" name="Target (Rule)" fill="#64748b" radius={[3, 3, 0, 0]} />
+        <Bar dataKey="Expected" name="Expected" fill="#94a3b8" radius={[3, 3, 0, 0]} />
+        <Bar dataKey="Actual" name="Actual Spent" fill="#10b981" radius={[3, 3, 0, 0]} />
       </BarChart>
     </ResponsiveContainer>
   );

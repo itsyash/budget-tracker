@@ -54,6 +54,7 @@ model RecurringItem {
   nature          String
   notes           String?
   active          Boolean   @default(true)
+  lastPaidMonth   String?
   createdAt       DateTime  @default(now())
 
   @@index([userId])
