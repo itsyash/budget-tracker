@@ -10,15 +10,15 @@ export default function StatCard({
   valueColor?: string;
 }) {
   return (
-    <div className="card p-5">
+    <div className="card p-3.5 flex flex-col justify-between">
       <div className="flex items-center justify-between">
-        <span className="muted text-xs font-semibold uppercase tracking-wide">{label}</span>
-        {icon && <span className="muted">{icon}</span>}
+        <span className="muted text-[11px] font-semibold uppercase tracking-wider">{label}</span>
+        {icon && <span className="muted opacity-70">{icon}</span>}
       </div>
-      <div className="text-2xl font-bold mt-3" style={valueColor ? { color: valueColor } : undefined}>
+      <div className="text-xl font-bold mt-2 tracking-tight text-[var(--text)]" style={valueColor ? { color: valueColor } : undefined}>
         {value}
       </div>
-      {hint && <div className="muted text-xs mt-1">{hint}</div>}
+      {hint && <div className="muted text-[11px] mt-1 truncate">{hint}</div>}
     </div>
   );
 }

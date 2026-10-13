@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { BUCKETS, NATURES } from "@/lib/constants";
 
 type Cat = { id: number; name: string; kind: string };
@@ -45,7 +46,7 @@ export default function RecurringFilterBar({
         </div>
         <div className="flex gap-2">
           <button type="submit" className="btn btn-primary flex-1">Apply</button>
-          {hasFilter && <a href="/recurring" className="btn">Clear</a>}
+          {hasFilter && <Link href="/recurring" className="btn">Clear</Link>}
         </div>
       </div>
     </form>

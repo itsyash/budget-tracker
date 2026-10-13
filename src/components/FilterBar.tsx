@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { BUCKETS, TX_TYPES, TX_TYPE_LABEL } from "@/lib/constants";
 
 type Cat = { id: number; name: string; kind: string };
@@ -47,7 +48,7 @@ export default function FilterBar({
         </div>
         <div className="flex gap-2">
           <button type="submit" className="btn btn-primary flex-1">Apply</button>
-          {hasFilter && <a href="/transactions" className="btn">Clear</a>}
+          {hasFilter && <Link href="/transactions" className="btn">Clear</Link>}
         </div>
       </div>
     </form>

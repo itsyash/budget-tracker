@@ -8,17 +8,17 @@ export default function AiKeyForm({ hasKey, maskedKey, model }: { hasKey: boolea
   const [state, action, pending] = useActionState<FormState, FormData>(updateAiSettings, {});
 
   return (
-    <form action={action} className="card p-6 space-y-4 max-w-xl">
+    <form action={action} className="card p-4 space-y-3.5 max-w-xl">
       <div>
-        <h3 className="font-bold mb-1">AI Key (Groq)</h3>
-        <p className="muted text-sm">
+        <h3 className="font-bold text-sm tracking-tight text-[var(--text)] mb-0.5">AI Key (Groq)</h3>
+        <p className="muted text-xs">
           Powers the Telegram bot&apos;s message parsing. Get a free key at{" "}
-          <a className="accent" href="https://console.groq.com" target="_blank" rel="noreferrer">console.groq.com</a>.
+          <a className="accent hover:underline font-medium" href="https://console.groq.com" target="_blank" rel="noreferrer">console.groq.com</a>.
         </p>
       </div>
 
       {hasKey && (
-        <p className="muted text-sm">Current key: <code>{maskedKey}</code> · leave the field blank to keep it.</p>
+        <p className="muted text-xs">Current key: <code>{maskedKey}</code> · leave the field blank to keep it.</p>
       )}
 
       <div>
@@ -30,11 +30,11 @@ export default function AiKeyForm({ hasKey, maskedKey, model }: { hasKey: boolea
         <input className="input" name="groqModel" defaultValue={model} placeholder="openai/gpt-oss-20b" />
       </div>
 
-      {state?.error && <p className="text-sm" style={{ color: "var(--danger)" }}>{state.error}</p>}
-      {state?.ok && <p className="text-sm" style={{ color: "var(--accent-2)" }}>AI key saved.</p>}
+      {state?.error && <p className="text-xs" style={{ color: "var(--danger)" }}>{state.error}</p>}
+      {state?.ok && <p className="text-xs" style={{ color: "var(--accent)" }}>AI key saved.</p>}
 
       <button type="submit" className="btn btn-primary" disabled={pending}>
-        <KeyRound size={16} /> {pending ? "Saving…" : "Save AI key"}
+        <KeyRound size={15} /> {pending ? "Saving…" : "Save AI key"}
       </button>
     </form>
   );

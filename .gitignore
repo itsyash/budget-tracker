@@ -51,7 +51,16 @@ prisma/*.db.bak
 # local databases & backups (never commit personal data)
 *.db
 *.db-journal
+*.db-shm
+*.db-wal
 *.bak
 prisma/*.db
 prisma/*.db-journal
+prisma/*.db-shm
+prisma/*.db-wal
 prisma/*.bak
+
+# private seed scripts and personal data imports
+prisma/seed-private.*
+*.private.*
+

@@ -59,3 +59,27 @@ export async function deleteRecurring(formData: FormData): Promise<void> {
   if (id) await prisma.recurringItem.deleteMany({ where: { id, userId: user.id } });
   revalidate();
 }
+
+export async function togglePaidThisMonth(id: number, targetMonth?: string): Promise<{ ok: boolean; error?: string }> {
+  const user = await requireUser();
+  try {
+    const now = new Date();
+    const currentMonth = targetMonth || `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}`;
+    const item = await prisma.recurringItem.findFirst({
+      where: { id, userId: user.id },
+      select: { id: true, lastPaidMonth: true },
+    });
+    if (!item) throw new Error("Item not found");
+
+    const nextPaidMonth = item.lastPaidMonth === currentMonth ? null : currentMonth;
+    await prisma.recurringItem.update({
+      where: { id: item.id },
+      data: { lastPaidMonth: nextPaidMonth },
+    });
+
+    revalidate();
+    return { ok: true };
+  } catch (e) {
+    return { ok: false, error: e instanceof Error ? e.message : "Failed to toggle status." };
+  }
+}

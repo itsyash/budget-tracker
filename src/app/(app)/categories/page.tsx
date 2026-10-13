@@ -13,7 +13,7 @@ export default async function CategoriesPage() {
   const categories = await prisma.category.findMany({ where: { userId: user.id }, orderBy: [{ kind: "asc" }, { name: "asc" }] });
 
   return (
-    <div className="p-5 md:p-8 max-w-[1100px] mx-auto">
+    <div className="p-4 md:p-6 max-w-[1100px] mx-auto">
       <PageHeader title="Categories" subtitle="Expense & income categories and their default buckets" actions={<CategoryForm />} />
       <div className="card overflow-hidden"><div className="overflow-x-auto">
         <table className="table">
@@ -22,9 +22,9 @@ export default async function CategoriesPage() {
             {categories.length === 0 && <tr><td colSpan={4} className="text-center muted py-10">No categories yet.</td></tr>}
             {categories.map((c) => (
               <tr key={c.id}>
-                <td className="font-medium">{c.name}</td>
-                <td><span className="badge capitalize">{c.kind}</span></td>
-                <td>{c.defaultBucket === "Income" ? <span className="badge">Income</span> : <BucketBadge bucket={c.defaultBucket} />}</td>
+                <td className="font-medium text-xs text-[var(--text)]">{c.name}</td>
+                <td><span className="badge text-[11px] capitalize">{c.kind}</span></td>
+                <td>{c.defaultBucket === "Income" ? <span className="badge text-[11px]">Income</span> : <BucketBadge bucket={c.defaultBucket} />}</td>
                 <td><div className="flex items-center gap-1 justify-end"><CategoryForm initial={{ id: c.id, name: c.name, defaultBucket: c.defaultBucket, kind: c.kind }} /><DeleteButton action={deleteCategory} id={c.id} message="Delete this category? Entries using it will be set to “no category”." /></div></td>
               </tr>
             ))}
